@@ -1,0 +1,18 @@
+nextPredictedLocations from Mobile interference so that no of server hit will reduce
+/**
+			JSONArray nextPredictedLocations = null;
+			if(StringUtils.hasText(userVisitInformation)){
+				nextPredictedLocations = jsonObject.getJSONArray("nextPredictedLocations");
+			}
+			if(nextPredictedLocations!=null && nextPredictedLocations.length()>0){
+				for (int i=0; i<nextPredictedLocations.length(); i++) {
+					JSONObject object = nextPredictedLocations.getJSONObject(i);
+					Location location = new Location(object.getDouble("lat"), object.getDouble("long"));
+					promoServiceByUserLocationAndTime = promoServiceFinder.findServicesByLocationTimeAndUserPreference(location, userPreferredServiceTypeNames);
+					promoServiceByUserLocationAndTime = userPreferenceService.sortServiceListWithUserPreference(promoServiceByUserLocationAndTime);
+					JSONObject nextObject = new JSONObject();
+					nextObject.put(location.generateLocationCode(), prepareResponseFromServiceList(promoServiceByUserLocationAndTime).toString());
+					serviceByUserMovementAndLocation.put(nextObject);
+				}	
+			}
+*/

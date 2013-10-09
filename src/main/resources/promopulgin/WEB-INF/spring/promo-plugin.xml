@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:jms="http://www.springframework.org/schema/jms"
+    xmlns:amq="http://activemq.apache.org/schema/core"
+    xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
+    xsi:schemaLocation="http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-3.0.xsd
+        http://www.springframework.org/schema/data/mongo
+        http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+        http://www.springframework.org/schema/jms 
+        http://www.springframework.org/schema/jms/spring-jms.xsd
+        http://activemq.apache.org/schema/core 
+        http://activemq.apache.org/schema/core/activemq-core.xsd
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring
+     	http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd">
+ 
+    <util:properties id="pluginProperties" location="/WEB-INF/promo-plugin.properties"/>
+    <context:property-placeholder location="/WEB-INF/promo-plugin.properties"/>
+    
+ 	<mongo:mongo host="localhost" port="27017" />
+ 
+	<bean id="mongoTemplate" class="org.springframework.data.document.mongodb.MongoTemplate">
+		<constructor-arg ref="mongo" />
+		<constructor-arg name="databaseName" value="${mongodb.database.name}" />
+		<constructor-arg name="defaultCollectionName" value="${mongodb.collection.name}" />
+	</bean>
+	<!-- To translate any MongoExceptions thrown in @Repository annotated classes -->
+	<context:annotation-config />
+	
+	<mvc:annotation-driven />
+	
+	<context:component-scan base-package="com.mobile.tool" />
+	
+	<!--  Embedded ActiveMQ Broker -->
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL">
+            <value>${activemq.broker.url}</value>
+        </property>
+    </bean>
+    
+    <bean id="destination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="${activemq.queue.name}"/>
+    </bean>
+    
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="defaultDestination" ref="destination" />
+    </bean>
+    
+    <jms:listener-container connection-factory="connectionFactory">
+     	<jms:listener destination="${activemq.queue.name}" ref="promoPluginMessageListener" method="onMessage" />
+	</jms:listener-container>
+	
+	<!-- Report db configuration-->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${db.driver.classname}"/>
+		<property name="url" value="${db.url}"/>
+		<property name="username" value="${db.username}"/>
+		<property name="password" value="${db.password}"/>
+		<property name="maxIdle" value="10" />
+		<property name="maxActive" value="100" />
+		<property name="maxWait" value="10000" />
+		<property name="validationQuery" value="select 1" />
+		<property name="testOnBorrow" value="true" />
+	</bean>
+	
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="annotatedClasses">
+			<list>
+				<value>com.mobile.tool.core.entity.Location</value>
+				<value>com.mobile.tool.core.entity.ServiceType</value>
+				<value>com.mobile.tool.core.entity.SubCategoryDimension</value>
+				<value>com.mobile.tool.core.entity.UserLocationInfo</value>
+				<value>com.mobile.tool.core.entity.UserSettingsMeasure</value>
+				<value>com.mobile.tool.promo.entity.UserServiceRelation</value>
+				<value>com.mobile.tool.inventory.entity.ItemMeasure</value>
+				<value>com.mobile.tool.request.intr.entity.RequestProcessorDimension</value>
+				<value>com.mobile.tool.request.intr.entity.UserRequestMeasure</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	 <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	 
+	  <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+	        <property name="prefix" value="/WEB-INF/view/" />
+	        <property name="suffix" value=".jsp" />
+	  </bean>
+ 
+	<!-- Bean defined for Quartz Scheduler  -->
+	<bean class="com.mobile.tool.core.listener.ToolApplicationListener">
+	</bean>
+    
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="jobFactory">
+			<bean class="com.mobile.tool.core.util.ToolQuartzJobFactory"></bean>
+		</property>
+    </bean>
+    
+    
+    <!-- Configuration related to ehcache -->
+    <ehcache:annotation-driven cache-manager="ehCacheManager" />
+    <ehcache:config cache-manager="ehCacheManager">
+      <!-- interval is in minutes -->
+      <ehcache:evict-expired-elements interval="5">
+      	<ehcache:include name="services_by_user_location"/>
+       	<ehcache:include name="services_by_location"/>
+      </ehcache:evict-expired-elements>
+    </ehcache:config>
+
+    <bean id="ehCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"/>
+    
+    <bean id="inventoryItemDaoImpl" class="com.mobile.tool.inventory.dao.impl.InventoryItemDaoPSQLImpl">
+		<property name="hibernateTemplate" ref="hibernateTemplate"></property>
+	</bean>
+    
+    <bean id="dbManager" class="com.mobile.tool.core.datahandler.DBManager">
+    	<property name="inventoryItemDao" ref="inventoryItemDaoImpl"></property>
+    </bean>
+</beans>
