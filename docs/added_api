@@ -1,0 +1,30 @@
+5.3	Fetch Request Processor Details 
+
+This service should return the processor details for the requested processor.
+5.3.1	Request
+
+URL: https://<host>:<port/plugin /requestintr/processordetails/{processorName}
+Path Variable
+
+Parameter Name	Mandatory	Datatype	Description
+processorName	Yes	N/A	Processor Name
+
+
+Method: GET
+
+This will be URL using which requested processor details can be fetched.
+
+5.3.2	Response Body
+
+{
+	"name": ""
+	"selection" : "{
+		"selection1":{
+			"type":"list",
+			"values": ["Less Than", "More Than", "Equal To"]
+		},
+		"selection2":{
+			"type", "input"
+		}
+	}"
+}
