@@ -1,30 +1,35 @@
-5.3	Fetch Request Processor Details 
+import java.io.IOException;
 
-This service should return the processor details for the requested processor.
-5.3.1	Request
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-URL: https://<host>:<port/plugin /requestintr/processordetails/{processorName}
-Path Variable
+// Mapped with /plugin/requestintr/
+public class RequestSubmitResponse extends HttpServlet {
 
-Parameter Name	Mandatory	Datatype	Description
-processorName	Yes	N/A	Processor Name
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2803624829206210511L;
+	private static int counter = 0;
 
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		counter++;
+		if (counter % 3 == 0) {
+			resp.getWriter().write(
+					"{" + "\"status\": \"FALSE\","
+							+ "\"message\": \"Request Limit Reached\""
+							+ "}");
 
-Method: GET
-
-This will be URL using which requested processor details can be fetched.
-
-5.3.2	Response Body
-
-{
-	"name": ""
-	"selection" : "{
-		"selection1":{
-			"type":"list",
-			"values": ["Less Than", "More Than", "Equal To"]
-		},
-		"selection2":{
-			"type", "input"
+		} else {
+			resp.getWriter().write(
+					"{" + "\"status\": \"TRUE\","
+							+ "\"message\": \" Request Posted Successfully \""
+							+ "}");
 		}
-	}"
+
+	}
 }
