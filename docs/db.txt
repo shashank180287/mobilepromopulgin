@@ -1,0 +1,58 @@
+PRODUCT CATEGORY		VENDOR CATEGORY			USER ROLE				
+product_category_id		vendor_category_id			role_id				
+product_category		vendor_category			role_name				
+product_description.		vendor_description			permissions				
+									
+									
+				USER RECORDS					
+				username					
+				password					
+				role_id					
+									
+		VENDOR RECORD							
+		vendor_code							
+		vendor_category_id							
+		vendor name							
+		vendor title							
+		vendor description							
+		mobile number							
+		email address							
+		conatct address							
+		physical address							
+		vendor username							
+		vendor website							
+									
+									
+	PRODUCT RECORD			CUSTOMER RECORD			EMPLOYEES RECORDS		TRANSECTION CHANNEL
+	product_code			customer_code auto increment			employee code		channel id
+	product_category			first_name			first name		channel name
+	product_name			last_name			last name		channel description
+	product desc			mobile Number			mobile no		
+	stock at hand			email_address			gender		
+	re-order			gender			Qualification		
+	unit_price			contact_address			profession		
+	bulk price			date_created automatic			age		
+	stock supplied			website_address			martail status		
+	vendor_code			customer_description			job description		
+	date_created automatic			customer username			employee manager		
+							email address		
+							date employeed		
+							job title		
+							previous jobs		
+							references or referees		
+							contact address		
+							employee username		
+									
+									
+	PRODUCT SUPPLY				SALES/TRANSACTION				
+	product code				transaction_id automatic				
+	product				product_id				
+	No of item(s)				No of Item(s)				
+	No of supplied				transaction title				
+					transaction desc				
+					transaction amount				
+					confirm amount				
+					transaction channel				
+					customer name				
+					employee name				
+					comments				
