@@ -1,3 +1,4 @@
+Release Notes
 nextPredictedLocations from Mobile interference so that no of server hit will reduce
 /**
 			JSONArray nextPredictedLocations = null;
